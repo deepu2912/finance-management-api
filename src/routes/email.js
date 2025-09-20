@@ -41,6 +41,7 @@ router.post('/send-email', async (req, res) => {
     // Some serverless environments (or proxy rewrites) may deliver the JSON body as a
     // string. Be defensive: if req.body is a string, try to parse it.
     let payload = req.body;
+    console.log('Received payload for send-email:', payload);
     if (typeof payload === 'string') {
       try {
         payload = JSON.parse(payload);
