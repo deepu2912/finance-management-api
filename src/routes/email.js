@@ -1,8 +1,5 @@
 const express = require('express');
-const app = express();
 const { sendEmail } = require('../config/email');
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));
 const router = express.Router();
 
 /**
@@ -54,6 +51,19 @@ router.post('/send-email', async (req, res) => {
       }
     }
 
+    // If payload is a Buffer (seen in Netlify logs), convert to string and parse JSON
+    if (payload && typeof payload === 'object' && Buffer.isBuffer(payload)) {
+      try {
+        const str = payload.toString();
+        payload = JSON.parse(str);
+        console.log('Parsed payload from Buffer:', payload);
+      } catch (err) {
+        console.warn('Could not parse Buffer payload as JSON');
+        // fallback to string representation
+        payload = payload.toString();
+      }
+    }
+
     // If debug mode requested, echo headers and raw body to help diagnose client issues
     if (req.query && req.query.debug === 'true') {
       return res.status(200).json({
@@ -76,7 +86,7 @@ router.post('/send-email', async (req, res) => {
     // Validate request body
     if (!to || !subject || !body) {
       console.debug('Received payload for send-email:', payload);
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: 'Please provide email recipient (to), subject, and body'
       });
