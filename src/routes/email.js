@@ -38,10 +38,23 @@ const router = express.Router();
  */
 router.post('/send-email', async (req, res) => {
   try {
-    const { to, subject, body } = req.body;
+    // Some serverless environments (or proxy rewrites) may deliver the JSON body as a
+    // string. Be defensive: if req.body is a string, try to parse it.
+    let payload = req.body;
+    if (typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload);
+      } catch (err) {
+        // leave payload as string if parse fails
+        console.warn('Warning: failed to parse string payload as JSON');
+      }
+    }
+
+    const { to, subject, body } = payload || {};
 
     // Validate request body
     if (!to || !subject || !body) {
+      console.debug('Received payload for send-email:', payload);
       return res.status(400).json({
         success: false,
         message: 'Please provide email recipient (to), subject, and body'
