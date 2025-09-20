@@ -74,7 +74,7 @@ router.post('/send-email', async (req, res) => {
     // Validate request body
     if (!to || !subject || !body) {
       console.debug('Received payload for send-email:', payload);
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: 'Please provide email recipient (to), subject, and body'
       });
