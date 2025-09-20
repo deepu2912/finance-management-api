@@ -91,18 +91,28 @@ router.post('/send-email', async (req, res) => {
 
     // Send email
     const result = await sendEmail(to, subject, body);
-    
+
     res.status(200).json({
       success: true,
       message: 'Email sent successfully',
       messageId: result.messageId
     });
   } catch (error) {
-    console.error('Error in send-email route:', error);
+    console.error('Error in send-email route:', error && error.message ? error.message : error);
+
+    // Nodemailer/Gmail auth failures often produce messages like 'Invalid login' or 'Username and Password not accepted'
+    const msg = (error && error.message) ? error.message.toLowerCase() : '';
+    if (msg.includes('invalid') || msg.includes('auth') || msg.includes('username') || msg.includes('authentication')) {
+      return res.status(401).json({
+        success: false,
+        message: 'SMTP authentication failed. Check EMAIL_USER and EMAIL_PASS or your SMTP settings.'
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Failed to send email',
-      error: error.message
+      error: error && error.message ? error.message : String(error)
     });
   }
 });
