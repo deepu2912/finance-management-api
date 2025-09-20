@@ -10,7 +10,18 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+// Capture raw body (useful for debugging serverless environments where body may arrive
+// as a string or encoded). The `verify` function stores the raw buffer as req.rawBody
+// while still allowing express.json() to parse the JSON into req.body.
+app.use(express.json({
+  verify: (req, _res, buf) => {
+    try {
+      req.rawBody = buf && buf.toString();
+    } catch (err) {
+      req.rawBody = undefined;
+    }
+  }
+}));
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
