@@ -12,10 +12,12 @@ const options = {
         email: 'deepanshu2912@gmail.com'
       }
     },
+    // Use an environment variable when deployed (e.g. Netlify) or default to root so
+    // Swagger UI issues requests to the same origin. Avoid hardcoding localhost.
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Development server'
+        url: process.env.SWAGGER_BASE_URL || '/',
+        description: 'API server (use SWAGGER_BASE_URL in production if needed)'
       }
     ],
     components: {
