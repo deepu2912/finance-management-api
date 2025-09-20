@@ -24,8 +24,13 @@ app.get('/swagger.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
-});
+// Export app for serverless adapters (Netlify, AWS Lambda, etc.)
+if (require.main === module) {
+  // If this file is executed directly (node src/index.js), start the server.
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+  });
+}
+
+module.exports = app;
